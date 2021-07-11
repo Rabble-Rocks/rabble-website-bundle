@@ -1,0 +1,11 @@
+<h1>{{ content.title }}</h1>
+<p>
+Welcome to this dummy page. You are currently on <a href="{{ url(content.id) }}">{{ content.title }}</a>.<br>
+This link is proof that URL generation for content documents is working.
+</p>
+<ul>
+    {% for locale in locales %}
+        <li><a href="{{ url(content.id, {_locale: locale}) }}">This page in "{{ locale }}"</a></li>
+    {% endfor %}
+</ul>
+{{ knp_menu_render('main') }}

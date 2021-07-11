@@ -1,0 +1,27 @@
+{
+    "name": "rabble/website-bundle",
+    "type": "symfony-bundle",
+    "description": "The website bundle is responsible for routing and linking content from the content bundle to the website.",
+    "keywords": ["rabble", "admin", "website", "cms"],
+    "homepage": "https://rabble.rocks",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rachel Snijders",
+            "email": "rainbowvision.bn@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "rabble/content-bundle": "*",
+        "symfony-cmf/routing-bundle": "^2.5"
+    },
+    "autoload": {
+        "psr-4": { "Rabble\\WebsiteBundle\\": "src/WebsiteBundle" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}

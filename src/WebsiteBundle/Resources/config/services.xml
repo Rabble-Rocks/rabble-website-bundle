@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service id="rabble_website.router" class="Rabble\WebsiteBundle\Routing\WebsiteRouter">
+            <argument type="service" id="router.request_context"/>
+            <argument type="service" id="rabble_website.request_matcher" />
+            <argument type="service" id="rabble_website.route_generator"/>
+            <argument>null</argument>
+            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="rabble_website.route_provider"/>
+            <call method="setRequestStack"><argument type="service" id="request_stack"/></call>
+        </service>
+        <service id="rabble_website.request_matcher" class="Rabble\WebsiteBundle\Routing\RequestMatcher">
+            <argument type="service" id="rabble_website.route_provider"/>
+        </service>
+        <service id="rabble_website.route_generator" class="Rabble\WebsiteBundle\Routing\UrlGenerator">
+            <argument type="service" id="rabble_website.route_provider"/>
+            <argument type="service" id="router.request_context"/>
+            <argument type="service" id="logger"/>
+            <argument>%kernel.default_locale%</argument>
+        </service>
+        <service
+                id="rabble_website.route_provider"
+                class="Rabble\WebsiteBundle\Routing\RouteProvider"
+                public="true">
+            <argument type="service" id="elasticsearch_index.collection.content"/>
+            <argument type="service" id="rabble_website.routing.localization_strategy.default"/>
+            <argument type="service" id="rabble_content.content_type_manager"/>
+            <argument type="service" id="Rabble\ContentBundle\Persistence\Manager\ContentManager"/>
+            <argument type="service" id="rabble_content.content.structure_builder"/>
+            <argument>%kernel.default_locale%</argument>
+        </service>
+        <service id="rabble_website.routing.path_localization_strategy" class="Rabble\WebsiteBundle\Routing\Localization\PathLocalizationStrategy">
+            <argument>%rabble_admin.locales%</argument>
+            <tag name="rabble_website.localization_strategy" alias="path" />
+        </service>
+        <service id="rabble_website.routing.domain_localization_strategy" class="Rabble\WebsiteBundle\Routing\Localization\DomainLocalizationStrategy">
+            <argument>%rabble_admin.locales%</argument>
+            <argument>%rabble_website.domain_mapping%</argument>
+            <tag name="rabble_website.localization_strategy" alias="domain" />
+        </service>
+        <service id="rabble_website.event_listener.redirect_base_route_subscriber" class="Rabble\WebsiteBundle\EventListener\RedirectBaseRouteSubscriber">
+            <argument type="service" id="router"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+        <service id="Rabble\WebsiteBundle\Controller\DefaultController" autowire="true" autoconfigure="true">
+            <tag>controller.service_arguments</tag>
+        </service>
+    </services>
+</container>
