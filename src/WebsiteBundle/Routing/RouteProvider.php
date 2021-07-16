@@ -154,12 +154,7 @@ class RouteProvider implements LocaleAwareRouteProviderInterface
         if (null === $content) {
             return;
         }
-        $structure = $this->structureBuilder->build($content);
-        $content = array_merge([
-            'id' => $id,
-            'contentType' => $source['contentType'] ?? null,
-            'title' => $source['title'] ?? null,
-        ], $structure);
-        $route->setDefault(WebsiteRouter::CONTENT_KEY, $content);
+        $structure = $this->structureBuilder->build($content, StructureBuilder::TARGET_WEBSITE);
+        $route->setDefault(WebsiteRouter::CONTENT_KEY, $structure);
     }
 }
