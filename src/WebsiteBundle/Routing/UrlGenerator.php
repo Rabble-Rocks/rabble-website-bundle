@@ -44,9 +44,6 @@ class UrlGenerator extends BaseUrlGenerator
                 $parameters['_locale'] = $defaults['_locale'];
             }
         }
-        if (isset($parameters['contentDocument'])) {
-            unset($parameters['contentDocument']);
-        }
 
         return $this->doGenerate($variables, $defaults, $route->getRequirements(), $compiledRoute->getTokens(), $parameters, $name, $referenceType, $compiledRoute->getHostTokens(), $route->getSchemes());
     }

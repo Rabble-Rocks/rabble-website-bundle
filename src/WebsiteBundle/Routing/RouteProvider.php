@@ -8,6 +8,7 @@ use ONGR\ElasticsearchDSL\Query\Compound\BoolQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use Rabble\ContentBundle\Content\Structure\StructureBuilder;
 use Rabble\ContentBundle\ContentType\ContentTypeManagerInterface;
+use Rabble\ContentBundle\Persistence\Document\ContentDocument;
 use Rabble\ContentBundle\Persistence\Manager\ContentManager;
 use Rabble\WebsiteBundle\Controller\DefaultController;
 use Rabble\WebsiteBundle\Routing\Localization\LocalizationStrategyInterface;
@@ -25,6 +26,8 @@ class RouteProvider implements LocaleAwareRouteProviderInterface
     private ContentManager $contentManager;
     private StructureBuilder $structureBuilder;
     private string $defaultLocale;
+    /** @var Route[] */
+    private array $cachedRoutes = [];
 
     public function __construct(
         ArrayCollection $indexes,
@@ -73,13 +76,27 @@ class RouteProvider implements LocaleAwareRouteProviderInterface
      */
     public function getRouteByName($name): Route
     {
+        if (isset($this->cachedRoutes[$name])) {
+            return $this->cachedRoutes[$name];
+        }
         $content = $this->contentManager->find($name);
         if (null === $content) {
             throw new RouteNotFoundException();
         }
         $route = new Route($content->getProperties()['slug'] ?? '/');
         $route->setDefault('_locale', $this->contentManager->getLocale());
-        $this->enhanceRoute($route, $this->structureBuilder->build($content), $content->getUuid());
+        $source = [
+            'contentType' => null,
+            'title' => null,
+        ];
+        if ($content instanceof ContentDocument) {
+            $source = [
+                'contentType' => $content->getContentType(),
+                'title' => $content->getTitle(),
+            ];
+        }
+        $this->enhanceRoute($route, $source, $content->getUuid(), false);
+        $this->cachedRoutes[$name] = $route;
 
         return $route;
     }
@@ -115,7 +132,7 @@ class RouteProvider implements LocaleAwareRouteProviderInterface
         return $this->contentManager->getLocale() ?? $this->defaultLocale;
     }
 
-    private function enhanceRoute(Route $route, array $source, string $id): void
+    private function enhanceRoute(Route $route, array $source, string $id, bool $provideContent = true): void
     {
         $this->localizationStrategy->enhanceRoute($route);
         $defaults = [
@@ -130,6 +147,9 @@ class RouteProvider implements LocaleAwareRouteProviderInterface
             }
         }
         $route->addDefaults($defaults);
+        if (!$provideContent) {
+            return;
+        }
         $content = $this->contentManager->find($id);
         if (null === $content) {
             return;
