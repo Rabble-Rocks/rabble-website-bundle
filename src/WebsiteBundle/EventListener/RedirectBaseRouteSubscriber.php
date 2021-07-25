@@ -33,7 +33,11 @@ class RedirectBaseRouteSubscriber implements EventSubscriberInterface
         if (!$request->attributes->has('contentDocument')) {
             return;
         }
-        $uri = $this->router->generate($request->attributes->get('_route'));
+        $routeParams = $request->attributes->get('_route_params', []);
+        if (isset($routeParams['contentDocument'])) {
+            unset($routeParams['contentDocument']);
+        }
+        $uri = $this->router->generate($request->attributes->get('_route'), $routeParams);
         if ($request->getPathInfo() !== $uri) {
             $event->setResponse(new RedirectResponse($uri, 301));
         }
